@@ -34,5 +34,6 @@ public class CreateTodoTest {
                 .post("/todos")
         .then()
                 .statusCode(201);
+
     }
 }
