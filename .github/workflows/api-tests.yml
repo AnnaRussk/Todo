@@ -14,13 +14,13 @@ jobs:
       todo-api:
         image: annar13/todo-app:latest
         ports:
-          - 8080:4242
+          - 4242:4242
         options: >-
-          --health-cmd "curl --fail http://localhost:8080/todos || exit 1"
+          --health-cmd "curl --fail http://localhost:4242/todos || exit 1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
-          
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -33,9 +33,9 @@ jobs:
 
       - name: Wait for Todo API to be ready
         run: |
-          echo "Waiting for Todo API to response...
+          echo "Waiting for Todo API to respond..."
           sleep 15
-          curl --retry 5 --retry-connrefused --retry-delay 3 http://localhost:8080/todos
+          curl --retry 5 --retry-connrefused --retry-delay 3 http://localhost:4242/todos
 
       - name: Run Maven Tests
         run: mvn test
