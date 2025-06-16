@@ -1,4 +1,4 @@
-name: API tests with GHCR
+name: API tests with GHCR image
 
 on:
   push:
@@ -10,32 +10,27 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      todo-api:
-        image: ghcr.io/annarussk/todo-app:latest
-        ports:
-          - 8080:4242
-        options: >-
-          --health-cmd "curl --fail http://localhost:8080/todos || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Pull docker image
+        run: docker pull ghcr.io/annarussk/todo-app:latest
+
+      - name: Run container
+        run: |
+          docker run -d -p 8080:4242 --name todo-app ghcr.io/annarussk/todo-app:latest
+          sleep 10
+          curl --retry 5 --retry-connrefused --retry-delay 3 http://localhost:8080/todos
 
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: Wait for Todo API to be ready
-        run: |
-          echo "Waiting for Todo API to respond..."
-          sleep 10
-          curl --retry 5 --retry-connrefused --retry-delay 3 http://localhost:8080/todos
 
       - name: Run Maven tests
         run: mvn test
