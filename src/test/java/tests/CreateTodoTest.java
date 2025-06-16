@@ -16,7 +16,7 @@ public class CreateTodoTest {
 
     @BeforeAll
     static void setUp() {
-        RestAssured.baseURI = "http://localhost:4242";
+        RestAssured.baseURI = "http://localhost:8080";
         RestAssured.defaultParser = Parser.JSON;
     }
 
