@@ -16,6 +16,7 @@ jobs:
         ports:
           - 8080:4242
         options: >-
+          --platform linux/amd64
           --health-cmd "curl --fail http://localhost:8080/todos || exit 1"
           --health-interval 10s
           --health-timeout 5s
