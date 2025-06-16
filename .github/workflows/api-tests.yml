@@ -1,0 +1,41 @@
+name: API tests with docker
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      todo-api:
+        image: annar13/todo-app:latest
+        ports:
+          - 8080:4242
+        options: >-
+          --health-cmd "curl --fail http://localhost:8080/todos || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Wait for Todo API to be ready
+        run: |
+          echo "Waiting for Todo API to response...
+          sleep 15
+          curl --retry 5 --retry-connrefused --retry-delay 3 http://localhost:8080/todos
+
+      - name: Run Maven Tests
+        run: mvn test
