@@ -5,6 +5,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.parsing.Parser;
 import models.CreateTodoRequest;
+import models.TodoResponse;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -35,5 +36,33 @@ public class CreateTodoTest {
         .then()
                 .statusCode(201);
 
+    }
+
+    @Test
+    void shouldNotAllowedDuplicateTodoId() {
+        int id = faker.number().numberBetween(1000, 2000);
+        String text = faker.lorem().sentence(3);
+
+        CreateTodoRequest request = new CreateTodoRequest(id, text);
+        TodoResponse response = new TodoResponse();
+
+        //первый проходит успешно
+        given()
+                .contentType(ContentType.JSON)
+                .body(request)
+        .when()
+                .post("/todos")
+        .then()
+                .statusCode(201);
+
+        //второй пост с тем же id должен вернуть ошибку
+        given()
+                .contentType(ContentType.JSON)
+                .body(request)
+        .when()
+                .post("/todos")
+        .then()
+                .statusCode(400)
+                .log().all();
     }
 }
